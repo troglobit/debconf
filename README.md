@@ -23,12 +23,43 @@ Confused yet?  Let's go through the three files: `config`, `templates`,
 and `script`.
 
 
-Template
---------
+Files
+-----
 
-It contains all the notes, different questions you want to ask the user,
-be it boolean(true/false), multiple answer, string inputs, displaying
-notes, everything you want to display or ask the user.
+To use Debconf in your project, you need these two files:
+
+    debian/config     <--- Set eXecutable bit!
+    debian/templates
+
+The `config` dictates the order in which to pose questions, which are
+defined in `templates`.  This latter file can also be translated, see
+the official documentation for this.
+
+Those two files only handle the input to the debconf db.  Usually you
+want to use that information in the `postinst` script.
+
+    debian/postinst   <--- In our example we provide `script`
+
+This file is called *after* your package has been installed to the file
+system.  It is here you create or modify any `*.conf` file with info
+from the debconf db.  If you need to do some system configuration or
+preparation *before* the package has been installed, use `preinst`, but
+that also requires some more digging in the official documentation.
+
+You also need to tell `dpkg-buildpackage` to include the `config` and
+your `templates`.  This requires modifying two files:
+
+    debian/control    <--- Add 'debconf (>= 0.2.17)' to Depends:
+    debian/rules      <--- Add 'dh_installdebconf' to binary-*: rules
+
+
+Templates
+---------
+
+The `templates` file contains all the notes, different questions you
+want to ask the user, be it boolean(true/false), multiple answer, string
+inputs, displaying notes, everything you want to display or ask the
+user.
 
 > P.S. make sure you leave a space in the begining of the Long
 > Description, check the file in case you have any doubt.
@@ -57,10 +88,28 @@ printed the inputs stored.
 Where to find the Debconf database?
 -----------------------------------
 
-    /var/cache/debconf/config.dat
+Do not modify these files directly!
 
-`config.dat` stores all the template questions, notes everything you
-stored in the template file once you have run the config script.
+    /var/cache/debconf/config.dat
+    /var/cache/debconf/templates.dat
+
+`config.dat` stores all the template questions and their replies, notes
+if the user has 'seen' the questions already, to avoid asking again and
+again.
+
+`templates.dat` stores all templates.
+
+Use the following magic to work remove templates or unset the 'seen'
+flag:
+
+    echo PURGE | sudo debconf-communicate <packagename>
+    echo UNREGISTER package/setting | sudo debconf-communicate
+    echo FSET package/setting seen false | sudo debconf-communicate
+
+To see the value of settings:
+
+    echo GET package/setting | sudo debconf-communicate
+
 
 How to run the scripts?
 -----------------------
@@ -69,17 +118,5 @@ How to run the scripts?
 2. run the first script `sudo ./config` .You need to use sudo in order
    to make changes to the debconf database
 3. run the second script `sudo ./script`
-
-> P.S. The first script would run for only one time as after running if
-> on the first time the flag in the debconf database gets set or "seen",
-> but you can run the second script(script) any number of time.
-
-If you want to run the first script(config) again, do the following:
-
-    $ sudo gedit /var/cache/debconf/config.dat
-
-Search for your template(s) and remove "seen" from all the flags of your
-templates, once you have deleted seen, you can run the config script
-again.
 
 That's all, best of luck again and enjoy your experience!
