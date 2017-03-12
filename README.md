@@ -99,8 +99,8 @@ again.
 
 `templates.dat` stores all templates.
 
-Use the following magic to work remove templates or unset the 'seen'
-flag:
+Use the following [magic commands][debconf] to work remove templates or
+unset the 'seen' flag:
 
     echo PURGE | sudo debconf-communicate <packagename>
     echo UNREGISTER package/setting | sudo debconf-communicate
@@ -120,3 +120,5 @@ How to run the scripts?
 3. run the second script `sudo ./script`
 
 That's all, best of luck again and enjoy your experience!
+
+[debconf]: https://www.debian.org/doc/packaging-manuals/debconf_specification.html#AEN106
