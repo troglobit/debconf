@@ -14,5 +14,5 @@ echo "Your full name is: $name"
 
 db_get honey/like_linux
 great="$RET"
-echo "so your answer was, $great"
+echo "so your answer was: $great"
 db_stop
